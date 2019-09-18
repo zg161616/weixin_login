@@ -1,0 +1,18 @@
+package com.cwc.service;
+
+import com.cwc.model.User;
+
+/**
+ * @author bwh
+ * @date 2019/9/18/018 - 11:37
+ * @Description
+ */
+public class UserService {
+    public boolean getUser(String openid){
+        User user = User.dao.findFirst("SELECT * FROM sys_user WHERE openid = ?",openid);
+        if(user==null){
+            return false;
+        }
+        return true;
+    }
+}

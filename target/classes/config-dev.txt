@@ -1,0 +1,3 @@
+    jdbcUrl = jdbc:mysql://localhost:3306/db_weixin?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull
+    user = root
+    password = root
