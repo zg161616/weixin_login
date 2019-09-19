@@ -15,4 +15,12 @@ public class UserService {
         }
         return true;
     }
+
+    public boolean login(String name,String pwd){
+        User user = User.dao.findFirst("SELECT * FROM sys_user WHERE name = ? AND pwd = ?",name,pwd);
+        if(user==null){
+            return false;
+        }
+        return true;
+    }
 }

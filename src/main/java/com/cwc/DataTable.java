@@ -9,7 +9,7 @@ import java.io.Serializable;
  */
 public class DataTable   {
     private Object data;
-    private String msg;
+    private String errorMsg;
     private int code;
 
     public DataTable(Object data) {

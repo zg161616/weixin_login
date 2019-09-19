@@ -97,33 +97,52 @@ public class Controller extends com.jfinal.core.Controller {
         }
     }
 
-
-
-
-    public void getOpenId() {
-        BufferedReader in = null;
-        String result = "";
-        if (StrKit.isBlank(code)) {
-            return;
-        }
+    public JSONObject getUnionId(String code) {
+        String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+appId+"&secret="+sercret+"&grant_type=authorization_code"+"&js_code="+code;
+        String openId = "";
+        JSONObject object = new JSONObject();
         try {
-            URL url = new URL("https://api.weixin.qq.com/sns/oauth2/access_token?appid=" + appId + "&secret=" + sercret + "&code=" + code + "&grant_type=authorization_code");
-            URLConnection connection = url.openConnection();
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                result += line;
+            Object result = HttpRequestUtils.httpGet(url);
+            JSONObject jsonObject = JSON.parseObject(result.toString());
+            if(jsonObject.get("errcode")!=null){
+                int errcode = jsonObject.getInteger("errcode");
+                throw new Exception(errcode+"");
             }
-            in.close();
-            JSONObject jsonObject = (JSONObject)JSONObject.parse(result);
-            access_token = jsonObject.getString("access_token");
-            openId = jsonObject.getString("openid");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+            object = jsonObject;
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return object;
     }
+
+
+
+//    public void getOpenId() {
+//        BufferedReader in = null;
+//        String result = "";
+//        if (StrKit.isBlank(code)) {
+//            return;
+//        }
+//        try {
+//            URL url = new URL("https://api.weixin.qq.com/sns/oauth2/access_token?appid=" + appId + "&secret=" + sercret + "&code=" + code + "&grant_type=authorization_code");
+//            URLConnection connection = url.openConnection();
+//            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//            String line;
+//            while ((line = in.readLine()) != null) {
+//                result += line;
+//            }
+//            in.close();
+//            JSONObject jsonObject = (JSONObject)JSONObject.parse(result);
+//            access_token = jsonObject.getString("access_token");
+//            openId = jsonObject.getString("openid");
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public void getUserInfo() {
         String result = "";
@@ -147,5 +166,46 @@ public class Controller extends com.jfinal.core.Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void register(){
+        String name = get("name");
+        String pwd = get("pwd");
+        String code = get("code");
+        JSONObject jsonObject = getUnionId(code);
+        String openid = jsonObject.getString("openid");
+        String sessionKey = jsonObject.getString("session_key");
+        User user = new User();
+        user.setOpenid(openid);
+        user.setSessionKey(sessionKey);
+        user.setName(name);
+        user.setPwd(pwd);
+        JSONObject  tmp = new JSONObject();
+        if(userService.getUser(openid)){
+            tmp.put("msg","已经注册过");
+            tmp.put("code",1);
+            renderJson(tmp);
+            return;
+        }
+        if(user.save()){
+            tmp.put("msg","注册成功");
+            tmp.put("code",0);
+        }
+        else{
+            tmp.put("msg","注册失败");
+            tmp.put("code",1);
+        }
+        renderJson(tmp);
+    }
+
+    public void login(){
+        String name = get("name");
+        String pwd = get("pwd");
+        boolean login = userService.login(name, pwd);
+            try {
+                getResponse().getWriter().print(login);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
     }
 }
