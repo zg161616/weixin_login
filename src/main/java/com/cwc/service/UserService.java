@@ -8,12 +8,16 @@ import com.cwc.model.User;
  * @Description
  */
 public class UserService {
-    public boolean getUser(String openid){
+    public boolean findUser(String openid){
         User user = User.dao.findFirst("SELECT * FROM sys_user WHERE openid = ?",openid);
         if(user==null){
             return false;
         }
         return true;
+    }
+
+    public User getUser(String openid){
+        return User.dao.findFirst("SELECT * FROM sys_user WHERE openid = ?",openid);
     }
 
     public boolean login(String name,String pwd){

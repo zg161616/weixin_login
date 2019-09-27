@@ -5,14 +5,26 @@ import com.alibaba.fastjson.JSONObject;
 import com.cwc.model.User;
 import com.cwc.service.UserService;
 import com.jfinal.aop.Inject;
+import com.jfinal.kit.HttpKit;
 import com.jfinal.kit.StrKit;
+import org.dom4j.*;
+import org.dom4j.io.DOMReader;
+import org.xml.sax.SAXException;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -71,51 +83,75 @@ public class Controller extends com.jfinal.core.Controller {
 //    }
 
 
-    public void index() {
-        js_code = get("code");
-        String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+appId+"&secret="+sercret+"&grant_type=authorization_code"+"&js_code="+js_code;
+
+    public  void index() {
+        String data = HttpKit.readData(getRequest());
+        System.out.println(data);
+        Message message = new Message();
         try {
-            Object result = HttpRequestUtils.httpGet(url);
-            JSONObject jsonObject = JSON.parseObject(result.toString());
-            if(jsonObject.get("errcode")!=null){
-                int errcode = jsonObject.getInteger("errcode");
-                throw new Exception(errcode+"");
-            }
-            openId = jsonObject.getString("openid");
-            session_key = jsonObject.getString("session_key");
-            if(!userService.getUser(openId)){
-            User user = new User();
-            user.setOpenid(openId);
-            user.setSessionKey(session_key);
-            user.save();
-            }
-            renderJson(openId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
+            Document document = DocumentHelper.parseText(data);
+            message = DomUtil.DomToObject(document, Message.class);
+            System.out.println(message);
+        } catch (DocumentException e) {
             e.printStackTrace();
         }
     }
 
-    public JSONObject getUnionId(String code) {
-        String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+appId+"&secret="+sercret+"&grant_type=authorization_code"+"&js_code="+code;
-        String openId = "";
-        JSONObject object = new JSONObject();
-        try {
-            Object result = HttpRequestUtils.httpGet(url);
-            JSONObject jsonObject = JSON.parseObject(result.toString());
-            if(jsonObject.get("errcode")!=null){
-                int errcode = jsonObject.getInteger("errcode");
-                throw new Exception(errcode+"");
-            }
-            object = jsonObject;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public Document replyMsg(String MsgType){
+    Document content = DocumentHelper.createDocument();
+    Element root = content.addElement("xml");
+        switch (MsgType){
+            case "text":
+                root.addElement("ToUserName");
         }
-        return object;
     }
+
+
+//    public void index() {
+//        js_code = get("code");
+//        String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+appId+"&secret="+sercret+"&grant_type=authorization_code"+"&js_code="+js_code;
+//        try {
+//            Object result = HttpRequestUtils.httpGet(url);
+//            JSONObject jsonObject = JSON.parseObject(result.toString());
+//            if(jsonObject.get("errcode")!=null){
+//                int errcode = jsonObject.getInteger("errcode");
+//                throw new Exception(errcode+"");
+//            }
+//            openId = jsonObject.getString("openid");
+//            session_key = jsonObject.getString("session_key");
+//            if(!userService.findUser(openId)){
+//            User user = new User();
+//            user.setOpenid(openId);
+//            user.setSessionKey(session_key);
+//            user.save();
+//            }
+//            renderJson(openId);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+//    public JSONObject getUnionId(String code) {
+//        String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+appId+"&secret="+sercret+"&grant_type=authorization_code"+"&js_code="+code;
+//        String openId = "";
+//        JSONObject object = new JSONObject();
+//        try {
+//            Object result = HttpRequestUtils.httpGet(url);
+//            JSONObject jsonObject = JSON.parseObject(result.toString());
+//            if(jsonObject.get("errcode")!=null){
+//                int errcode = jsonObject.getInteger("errcode");
+//                throw new Exception(errcode+"");
+//            }
+//            object = jsonObject;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return object;
+//    }
 
 
 
@@ -144,68 +180,109 @@ public class Controller extends com.jfinal.core.Controller {
 //        }
 //    }
 
-    public void getUserInfo() {
-        String result = "";
-        try {
-            BufferedReader in = null;
-            if(StrKit.isBlank(access_token)||StrKit.isBlank(openId)){
-                return;
-            }
-            URL url = new URL("https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN");
-            URLConnection connection = url.openConnection();
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//    public void getUserInfo() {
+//        String result = "";
+//        try {
+//            BufferedReader in = null;
+//            if(StrKit.isBlank(access_token)||StrKit.isBlank(openId)){
+//                return;
+//            }
+//            URL url = new URL("https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN");
+//            URLConnection connection = url.openConnection();
+//            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//
+//            String line;
+//            while ((line = in.readLine()) != null) {
+//                result += line;
+//            }
+//            in.close();
+//            user_info = result;
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    public void register(){
+//        String name = get("name");
+//        String pwd = get("pwd");
+//        String code = get("code");
+//        JSONObject jsonObject = getUnionId(code);
+//        String openid = jsonObject.getString("openid");
+//        String sessionKey = jsonObject.getString("session_key");
+//        User user = new User();
+//        user.setOpenid(openid);
+//        user.setSessionKey(sessionKey);
+//        user.setName(name);
+//        user.setPwd(pwd);
+//        JSONObject  tmp = new JSONObject();
+//        tmp.put("session_key",sessionKey);
+//        User customer = userService.getUser(openid);
+//        if(customer!=null){
+//            customer.setSessionKey(sessionKey);
+//            customer.update();
+//            tmp.put("msg","已经注册过");
+//            tmp.put("code",1);
+//            renderJson(tmp);
+//            return;
+//        }
+//        if(user.save()){
+//            tmp.put("msg","注册成功");
+//            tmp.put("code",0);
+//        }
+//        else{
+//            tmp.put("msg","注册失败");
+//            tmp.put("code",1);
+//        }
+//        renderJson(tmp);
+//    }
+//
+//    public void login(){
+//        String name = get("name");
+//        String pwd = get("pwd");
+//        boolean login = userService.login(name, pwd);
+//            try {
+//                getResponse().getWriter().print(login);
+//                getResponse().getWriter().close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//    }
+//
+//    public void updateSessionKey(){
+//        String code = get("code");
+//        JSONObject jsonObject =  getUnionId(code);
+//        String openid = jsonObject.getString("openid");
+//        String session_key = jsonObject.getString("session_key");
+//        User user = userService.getUser(openid);
+//        if(user==null){
+//            return;
+//        }
+//        user.setSessionKey(session_key);
+//        try {
+//            JSONObject object = new JSONObject();
+//            object.put("update",user.update());
+//            object.put("session_key",user.getSessionKey());
+//            getResponse().getWriter().print(object);
+//            getResponse().getWriter().close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    public void readFile(){
+//            File file = new File("D://index.pdf");
+//            renderFile(file);
+//    }
+//
+//    public void webView(){
+//        render("index.html");
+//    }
+//
+//    public void socketTest(){
+//
+//    }
 
-            String line;
-            while ((line = in.readLine()) != null) {
-                result += line;
-            }
-            in.close();
-            user_info = result;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void register(){
-        String name = get("name");
-        String pwd = get("pwd");
-        String code = get("code");
-        JSONObject jsonObject = getUnionId(code);
-        String openid = jsonObject.getString("openid");
-        String sessionKey = jsonObject.getString("session_key");
-        User user = new User();
-        user.setOpenid(openid);
-        user.setSessionKey(sessionKey);
-        user.setName(name);
-        user.setPwd(pwd);
-        JSONObject  tmp = new JSONObject();
-        if(userService.getUser(openid)){
-            tmp.put("msg","已经注册过");
-            tmp.put("code",1);
-            renderJson(tmp);
-            return;
-        }
-        if(user.save()){
-            tmp.put("msg","注册成功");
-            tmp.put("code",0);
-        }
-        else{
-            tmp.put("msg","注册失败");
-            tmp.put("code",1);
-        }
-        renderJson(tmp);
-    }
-
-    public void login(){
-        String name = get("name");
-        String pwd = get("pwd");
-        boolean login = userService.login(name, pwd);
-            try {
-                getResponse().getWriter().print(login);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-    }
 }
+
