@@ -96,15 +96,15 @@ public class Controller extends com.jfinal.core.Controller {
             e.printStackTrace();
         }
     }
-
-    public Document replyMsg(String MsgType){
-    Document content = DocumentHelper.createDocument();
-    Element root = content.addElement("xml");
-        switch (MsgType){
-            case "text":
-                root.addElement("ToUserName");
-        }
-    }
+//
+//    public Document replyMsg(String MsgType){
+//    Document content = DocumentHelper.createDocument();
+//    Element root = content.addElement("xml");
+//        switch (MsgType){
+//            case "text":
+//                root.addElement("ToUserName");
+//        }
+//    }
 
 
 //    public void index() {
