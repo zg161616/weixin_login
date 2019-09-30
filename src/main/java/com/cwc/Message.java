@@ -6,14 +6,50 @@ package com.cwc;
  * @Description
  */
 public class Message {
+
+
+    public static final String MSGTYPE_TEXT = "text";
+    public static final String MSGTYPE_EVENT = "event";
+    public static final String MSGTYPE_IMAGE = "image";
+
+
+
     private String toUserName;
     private String fromUserName;
     private String createTime;
     private String msgType;
-    private String content;
     private String msgId;
     private String event;
     private String latitude;
+    @Override
+    public String toString() {
+        return "Message{" +
+                "toUserName='" + toUserName + '\'' +
+                ", fromUserName='" + fromUserName + '\'' +
+                ", createTime='" + createTime + '\'' +
+                ", msgType='" + msgType + '\'' +
+                ", msgId='" + msgId + '\'' +
+                ", event='" + event + '\'' +
+                ", latitude='" + latitude + '\'' +
+                ", picUrl='" + picUrl + '\'' +
+                ", longitude='" + longitude + '\'' +
+                ", precision='" + precision + '\'' +
+                ", location_X='" + location_X + '\'' +
+                ", location_Y='" + location_Y + '\'' +
+                ", scale='" + scale + '\'' +
+                ", label='" + label + '\'' +
+                '}';
+    }
+
+    public String getPicUrl() {
+        return picUrl;
+    }
+
+    public void setPicUrl(String picUrl) {
+        this.picUrl = picUrl;
+    }
+
+    private String picUrl;
 
     public String getLocation_X() {
         return location_X;
@@ -33,26 +69,6 @@ public class Message {
 
     public String getScale() {
         return scale;
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "toUserName='" + toUserName + '\'' +
-                ", fromUserName='" + fromUserName + '\'' +
-                ", createTime='" + createTime + '\'' +
-                ", msgType='" + msgType + '\'' +
-                ", content='" + content + '\'' +
-                ", msgId='" + msgId + '\'' +
-                ", event='" + event + '\'' +
-                ", latitude='" + latitude + '\'' +
-                ", longitude='" + longitude + '\'' +
-                ", precision='" + precision + '\'' +
-                ", location_X='" + location_X + '\'' +
-                ", location_Y='" + location_Y + '\'' +
-                ", scale='" + scale + '\'' +
-                ", label='" + label + '\'' +
-                '}';
     }
 
     public void setScale(String scale) {
@@ -138,13 +154,6 @@ public class Message {
         this.msgType = msgType;
     }
 
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
 
     public String getMsgId() {
         return msgId;

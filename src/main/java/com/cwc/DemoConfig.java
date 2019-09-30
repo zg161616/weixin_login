@@ -59,6 +59,6 @@ public class DemoConfig extends JFinalConfig{
     }
 
     public static void main(String[] args) {
-        UndertowServer.start(DemoConfig.class,8080,true);
+        UndertowServer.start(DemoConfig.class,8089,true);
     }
 }

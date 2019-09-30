@@ -1,30 +1,18 @@
 package com.cwc;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.cwc.model.User;
 import com.cwc.service.UserService;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.HttpKit;
 import com.jfinal.kit.StrKit;
-import org.dom4j.*;
-import org.dom4j.io.DOMReader;
-import org.xml.sax.SAXException;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 /**
@@ -33,6 +21,11 @@ import java.util.Map;
  * @Description
  */
 public class Controller extends com.jfinal.core.Controller {
+
+
+
+
+
     @Inject
     UserService userService;
     private String appId = "wx166aa584e2848746";
@@ -85,26 +78,45 @@ public class Controller extends com.jfinal.core.Controller {
 
 
     public  void index() {
+        if(StrKit.isBlank(WXUtil.TOKEN)){
+            WXUtil.getToken();
+        }
         String data = HttpKit.readData(getRequest());
-        System.out.println(data);
         Message message = new Message();
         try {
             Document document = DocumentHelper.parseText(data);
-            message = DomUtil.DomToObject(document, Message.class);
-            System.out.println(message);
+            message = DomUtil.DomToObject(document);
+            Document reply =  replyMsg(message);
+            renderJson(reply.asXML().substring(39));
         } catch (DocumentException e) {
             e.printStackTrace();
         }
     }
 //
-//    public Document replyMsg(String MsgType){
-//    Document content = DocumentHelper.createDocument();
-//    Element root = content.addElement("xml");
-//        switch (MsgType){
-//            case "text":
-//                root.addElement("ToUserName");
-//        }
-//    }
+    public Document replyMsg(Message m){
+    Document content = DocumentHelper.createDocument();
+    Element root = content.addElement("xml");
+        switch (m.getMsgType()){
+            case Message.MSGTYPE_TEXT:
+                m = (TextMessage)m;
+                root.addElement("ToUserName").addText(m.getFromUserName());
+                root.addElement("FromUserName").addText(m.getToUserName());
+                root.addElement("CreateTime").addText(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                root.addElement("MsgType").addText(m.getMsgType());
+                root.addElement("Content").addText("hello");
+                break;
+            case Message.MSGTYPE_IMAGE:
+                m = (ImageMessage)m;
+                root.addElement("ToUserName").addText(m.getFromUserName());
+                root.addElement("FromUserName").addText(m.getToUserName());
+                root.addElement("CreateTime").addText(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                root.addElement("MsgType").addText(m.getMsgType());
+                root.addElement("MediaId").addText(WXUtil.getMedia("image"));
+                break;
+                
+        }
+        return content;
+    }
 
 
 //    public void index() {

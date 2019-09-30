@@ -1,5 +1,6 @@
 package com.cwc;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -11,8 +12,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URLDecoder;
+import java.util.Map;
 
 /**
  * Created by xxwu on 2017/5/8.
@@ -27,7 +29,7 @@ public class HttpRequestUtils {
      * @return
      */
     public static String httpPost(String url, String jsonParam) throws IOException {
-        return httpPost(url, jsonParam, false);
+        return httpPost(url, jsonParam, false,null);
     }
 
     /**
@@ -38,17 +40,21 @@ public class HttpRequestUtils {
      * @param noNeedResponse 不需要返回结果
      * @return
      */
-    public static String httpPost(String url, String jsonParam, boolean noNeedResponse) throws IOException {
+    public static String httpPost(String url, String jsonParam, boolean noNeedResponse, Map<String,String> _map) throws IOException {
         //post请求返回结果
         DefaultHttpClient httpClient = new DefaultHttpClient();
         String jsonResult = null;
         HttpPost method = new HttpPost(url);
+        for (String s : _map.keySet()) {
+            method.setHeader(s,_map.get(s));
+        }
         if (null != jsonParam) {
             //解决中文乱码问题
             StringEntity entity = new StringEntity(jsonParam.toString(), "utf-8");
             entity.setContentEncoding("UTF-8");
             entity.setContentType("application/json");
             method.setEntity(entity);
+
         }
         HttpResponse result = httpClient.execute(method);
         url = URLDecoder.decode(url, "UTF-8");
@@ -128,5 +134,7 @@ public class HttpRequestUtils {
         }
         return null;
     }
+
+
 
 }

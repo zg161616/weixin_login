@@ -16,11 +16,13 @@ import java.util.List;
  * @Description
  */
 public class DomUtil {
-    public static <T> T DomToObject(Document document,Class<T> classType){
+    public static <T> T DomToObject(Document document){
         try {
-            Object o= classType.newInstance();
-            Field[] fields = classType.getDeclaredFields();
-            List<Element> elements = document.getRootElement().elements();
+            Element root = document.getRootElement();
+            String msgType = upperLetter(root.element("MsgType").getText());
+            Class<?> classType =  Class.forName("com.cwc."+msgType + "Message");
+            Object o = classType.newInstance();
+            List<Element> elements =root.elements();
             for (Element element : elements) {
                 PropertyDescriptor pd  = new PropertyDescriptor(lowwerLetter(element.getName()),classType);
                 Method wM = pd.getWriteMethod();
@@ -35,6 +37,8 @@ public class DomUtil {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
         return (T)new Object();
     }
@@ -42,6 +46,9 @@ public class DomUtil {
 
     public static String lowwerLetter(String str){
         return str.substring(0,1).toLowerCase()+str.substring(1);
+    }
+    public static String upperLetter(String str){
+        return str.substring(0,1).toUpperCase()+str.substring(1);
     }
 
 }
