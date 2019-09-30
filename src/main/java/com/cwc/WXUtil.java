@@ -1,9 +1,8 @@
 package com.cwc;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.kit.HttpKit;
-import com.sun.deploy.net.HttpUtils;
+import okhttp3.*;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -37,19 +36,24 @@ public class WXUtil {
     public static String getMedia(String type){
         String s = String.format(ADD_MEDIA, TOKEN, type);
         String filepath = "D://logo.png";
-        File file =new File(filepath);
-        StringBuilder sb = new StringBuilder();
-        sb.append("--");
-        sb.append("\r\n");
-        sb.append("Content-Disposition: form-data;name=\"file\";filename=\"" + file.getName() + "\";filelength="+file.length()+"\r\n");
-        sb.append("Content-Type:application/octet-stream\r\n\r\n");
-        String data =fileToStr(file,"utf-8");
-        sb.append(data);
-        sb.append("\r\n----\r\n");
-        Map<String,String> headers = new HashMap<>();
-        headers.put("Content-Type","multipart/form-data;");
-        String post = HttpKit.post(s, null, sb.toString(),headers);
+        String post = uploadFile(s,filepath);
         return post;
+    }
+
+
+    public static String uploadFile(String url,String filepath){
+        OkHttpClient okHttpClient = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/octet-stream");
+        File file = new File(filepath);
+        RequestBody fileBody = RequestBody.create(file,mediaType);
+        MultipartBody multipartBody = new MultipartBody.Builder().setType(MediaType.parse("multipart/form-data")).addFormDataPart("test","test.png",fileBody).build();
+        Request request = new Request.Builder().post(multipartBody).url(url).build();
+        try {
+            okHttpClient.newCall(request).execute().body().toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String doPost(String url,String filepath){
