@@ -1,21 +1,14 @@
 package com.cwc;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jfinal.kit.HttpKit;
 import okhttp3.*;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
-/**
- * @author bwh
- * @date 2019/9/30/030 - 9:54
- * @Description
- */
+
 public class WXUtil {
     public static final String APPID = "wxc6080cdf86a883ab";
     public static final String SERCRET = "374c6b93c182bca6ad3d72783efa183e";
@@ -36,25 +29,25 @@ public class WXUtil {
     public static String getMedia(String type){
         String s = String.format(ADD_MEDIA, TOKEN, type);
         String filepath = "D://logo.png";
-        String post = uploadFile(s,filepath);
+        String post = uploadFile(s,new File(filepath));
         return post;
     }
 
-
-    public static String uploadFile(String url,String filepath){
+    public static String uploadFile(String url,File file){
         OkHttpClient okHttpClient = new OkHttpClient();
-        MediaType mediaType = MediaType.parse("application/octet-stream");
-        File file = new File(filepath);
-        RequestBody fileBody = RequestBody.create(file,mediaType);
-        MultipartBody multipartBody = new MultipartBody.Builder().setType(MediaType.parse("multipart/form-data")).addFormDataPart("test","test.png",fileBody).build();
-        Request request = new Request.Builder().post(multipartBody).url(url).build();
+        RequestBody fileBody = RequestBody.create(file, MediaType.parse("application/octet-stream"));
+        MultipartBody body = new MultipartBody.Builder().setType(MediaType.parse("multipart/form-data")).addFormDataPart("test","test.png",fileBody).build();
+        Request request = new Request.Builder().post(body).url(url).build();
+        String result = "";
         try {
-            okHttpClient.newCall(request).execute().body().toString();
+            result = okHttpClient.newCall(request).execute().body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return result;
     }
+
+
 
     public static String doPost(String url,String filepath){
         try {
@@ -135,4 +128,6 @@ public class WXUtil {
         }
         return null;
     }
+
+
 }
