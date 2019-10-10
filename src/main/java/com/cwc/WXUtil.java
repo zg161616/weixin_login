@@ -1,6 +1,7 @@
 package com.cwc;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.kit.StrKit;
 import okhttp3.*;
 
 import java.io.*;
@@ -9,12 +10,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 
+
 public class WXUtil {
     public static final String APPID = "wxc6080cdf86a883ab";
     public static final String SERCRET = "374c6b93c182bca6ad3d72783efa183e";
     public static final String ACCESS_TOKEN = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
     public static final String ADD_MEDIA = "https://api.weixin.qq.com/cgi-bin/media/upload?access_token=%s&type=%s";
     public static  String TOKEN  = "";
+    public static String UPLOAD = "https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=%s&type=%s";
 
     public static void getToken(){
        String url =  String.format(ACCESS_TOKEN,APPID,SERCRET);
@@ -28,15 +31,31 @@ public class WXUtil {
 
     public static String getMedia(String type){
         String s = String.format(ADD_MEDIA, TOKEN, type);
-        String filepath = "D://logo.png";
-        String post = uploadFile(s,new File(filepath));
-        return post;
+        String post = uploadFile(s,new File(findFilePath(type)));
+        JSONObject jsonObject = (JSONObject) JSONObject.parse(post);
+        String result = jsonObject.getString("media_id");
+        return result;
     }
+
+
+    public static String findFilePath(String type){
+        switch (type){
+            case Message.MSGTYPE_IMAGE:
+                return "D://logo.png";
+            case Message.MSGTYPE_VIDEO:
+                return "D://118756695-1-6.mp4";
+            case Message.MSGTYPE_VOICE:
+                return "D://music.mp3";
+                default:
+                    return "";
+        }
+    }
+
 
     public static String uploadFile(String url,File file){
         OkHttpClient okHttpClient = new OkHttpClient();
         RequestBody fileBody = RequestBody.create(file, MediaType.parse("application/octet-stream"));
-        MultipartBody body = new MultipartBody.Builder().setType(MediaType.parse("multipart/form-data")).addFormDataPart("test","test.png",fileBody).build();
+        MultipartBody body = new MultipartBody.Builder().setType(MediaType.parse("multipart/form-data")).addFormDataPart("media","media"+file.getName().substring(file.getName().indexOf(".")),fileBody).addFormDataPart("filename","media").addFormDataPart("filelength",file.length()+"").addFormDataPart("content-type","image/png").addFormDataPart("id","media").build();
         Request request = new Request.Builder().post(body).url(url).build();
         String result = "";
         try {
@@ -128,6 +147,16 @@ public class WXUtil {
         }
         return null;
     }
+
+    public static void main(String[] args) {
+        if(StrKit.isBlank(TOKEN)){
+            getToken();
+        }
+        String url  = String.format(UPLOAD,TOKEN,"image");
+        String result = uploadFile(url,new File(findFilePath("image")));
+        System.out.println(result);
+    }
+
 
 
 }

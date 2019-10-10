@@ -40,7 +40,7 @@ public class DomUtil {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return (T)new Object();
+        return null;
     }
 
 

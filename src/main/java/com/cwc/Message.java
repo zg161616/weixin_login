@@ -11,6 +11,8 @@ public class Message {
     public static final String MSGTYPE_TEXT = "text";
     public static final String MSGTYPE_EVENT = "event";
     public static final String MSGTYPE_IMAGE = "image";
+    public static final String MSGTYPE_VIDEO = "video";
+    public static final String MSGTYPE_VOICE = "voice";
 
 
 
