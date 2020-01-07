@@ -1,15 +1,19 @@
 package com.cwc.test;
 
+import com.jfinal.aop.Singleton;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author bwh
  * @date 2019/10/18/018 - 16:51
  * @Description
  */
-public class SocketServer  {
+public class SocketServer {
 
 
     public static void main(String[] args) {
@@ -17,29 +21,38 @@ public class SocketServer  {
             int port = 1101;
             ServerSocket server;
             server = new ServerSocket(port);
-            while(true) {
-                System.out.println("waiting");
-                Socket socket = server.accept();
-                InputStream inputStream = socket.getInputStream();
-                byte[] bytes = new byte[1024];
-                StringBuffer sb = new StringBuffer();
-                int len;
-                File file = new File("D://logo_upload.png");
-                if(!file.exists()){
-                    file.createNewFile();
-                }
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                String line = "";
+            server.setSoTimeout(1000*10);
+            ExecutorService executorService = Executors.newFixedThreadPool(100);
+            while (true) {
+                    System.out.println("waiting");
+                   final Socket socket = server.accept();
+                    Runnable runnable =new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                InputStream inputStream = socket.getInputStream();
+                                byte[] bytes = new byte[1024];
+                                StringBuffer sb = new StringBuffer();
+                                int len;
+                                File file = new File("D://phycont_upload.txt");
+                                if (!file.exists()) {
+                                    file.createNewFile();
+                                }
+                                OutputStream outputStream = new FileOutputStream(file);
+                                while ((len = inputStream.read(bytes)) != -1) {
+                                    outputStream.write(bytes, 0, len);
+                                }
+                                inputStream.close();
+                                outputStream.close();
+                            }catch (IOException e){
 
-                while((line=bufferedReader.readLine())!=null){
-                    System.out.println(line);
-                }
-//
-                inputStream.close();
+                            }
+                        }
+                    };
+                    executorService.submit(runnable);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }

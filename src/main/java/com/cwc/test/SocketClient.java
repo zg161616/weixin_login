@@ -19,7 +19,7 @@ public class SocketClient {
             Socket socket = new Socket(host,port);
             OutputStream outputStream = socket.getOutputStream();
             String message = "112";
-           BufferedInputStream   bufferedInputStream = new BufferedInputStream(new FileInputStream(new File("D://logo.png")));
+           BufferedInputStream   bufferedInputStream = new BufferedInputStream(new FileInputStream(new File("D://phycont.txt")));
            byte[] fileByte  = new byte[1024];
            int len;
            while((len=bufferedInputStream.read(fileByte))!=-1){
